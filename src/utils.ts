@@ -10,13 +10,13 @@ export interface generatePDFOptions {
   outputPDFFilename: string;
   pdfMargin: puppeteer.PDFOptions['margin'];
   contentSelector: string;
-  paginationSelector: string;
-  pdfFormat: puppeteer.PDFFormat;
+  pdfFormat: puppeteer.PaperFormat;
   excludeSelectors: Array<string>;
   cssStyle: string;
   puppeteerArgs: Array<string>;
   coverTitle: string;
   coverImage: string;
+  paginationSelector: string;
   disableTOC: boolean;
   coverSub: string;
   waitForRender: number;
@@ -62,7 +62,7 @@ export async function generatePDF({
       if (waitForRender) {
         await page.goto(`${nextPageURL}`);
         console.log(chalk.green('Rendering...'));
-        await page.waitFor(waitForRender);
+        await page.waitForFunction(waitForRender.toString());
       } else {
         // Go to the page specified by nextPageURL
         await page.goto(`${nextPageURL}`, {
