@@ -1,6 +1,6 @@
 {
-  "name": "mr-pdf",
-  "version": "1.1.0",
+  "name": "vitpress-generate-pdf",
+  "version": "1.1.2",
   "description": "Generate pdf from document",
   "main": "lib/cli.js",
   "scripts": {
@@ -23,8 +23,8 @@
     "mkdocs",
     "gitbook"
   ],
-  "homepage": "https://github.com/kohheepeace/mr-pdf",
-  "author": "Kohhee Peace <kohheepeace@gmail.com> (http://github.com/kohheePeace)",
+  "homepage": "https://github.com/jeffreys-cat/mr-pdf",
+  "author": "Jeffrey <color.dove@gmail.com> (https://github.com/jeffreys-cat/mr-pdf)",
   "license": "MIT",
   "dependencies": {
     "chalk": "^3.0.0",

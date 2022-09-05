@@ -44,6 +44,7 @@ program
   .option('--coverTitle <title>', 'title for PDF cover')
   .option('--coverImage <src>', 'image for PDF cover. *.svg file not working!')
   .option('--disableTOC', 'disable table of contents')
+  .option('--tocOnlyH1', 'disable table of contents level only includes h1')
   .option('--coverSub <subtitle>', 'subtitle for PDF cover')
   .option('--waitForRender <timeout>', 'wait for document render')
   .option('--headerTemplate <html>', 'html template for page header')

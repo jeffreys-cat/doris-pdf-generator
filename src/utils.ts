@@ -24,6 +24,7 @@ export interface generatePDFOptions {
   footerTemplate: string;
   buildDirPath: string;
   firstDocPath: string;
+  tocOnlyH1: boolean;
 }
 
 export async function generatePDF({
@@ -40,6 +41,7 @@ export async function generatePDF({
   coverTitle,
   coverImage,
   disableTOC,
+  tocOnlyH1,
   coverSub,
   waitForRender,
   headerTemplate,
@@ -149,7 +151,7 @@ export async function generatePDF({
   </div>`;
 
   // Add Toc
-  const { modifiedContentHTML, tocHTML } = generateToc(contentHTML);
+  const { modifiedContentHTML, tocHTML } = generateToc(contentHTML, tocOnlyH1);
 
   // Restructuring the html of a document
   await page.evaluate(
@@ -201,7 +203,7 @@ export async function generatePDF({
   });
 }
 
-function generateToc(contentHtml: string) {
+function generateToc(contentHtml: string, tocOnlyH1 = false) {
   const headers: Array<{
     header: string;
     level: number;
@@ -245,14 +247,16 @@ function generateToc(contentHtml: string) {
     return modifiedContentHTML;
   }
 
-  const toc = headers
-    .map(
-      (header) =>
-        `<li class="toc-item toc-item-${header.level}" style="margin-left:${
-          (header.level - 1) * 20
-        }px"><a href="#${header.id}">${header.header}</a></li>`,
-    )
-    .join('\n');
+  let TOC_HEADERS = headers;
+  if (tocOnlyH1) {
+    TOC_HEADERS = headers.filter((header) => header.level === 1);
+  }
+  const toc = TOC_HEADERS.map(
+    (header) =>
+      `<li class="toc-item toc-item-${header.level}" style="margin-left:${
+        (header.level - 1) * 20
+      }px"><a href="#${header.id}">${header.header}</a></li>`,
+  ).join('\n');
 
   const tocHTML = `
   <div class="toc-page" style="page-break-after: always;">
