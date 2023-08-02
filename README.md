@@ -1,17 +1,11 @@
-## ⚠️ Caution!
-
-Currently, this package is not catching up with docusaurus v2 HTML markup, so command may not find the correct HTML to loop through docs. Please modify the command to find correct HTML markup by yourself.
-
 ## 📌 Introduction
 
-This is a PDF generator from document website such as `docusaurus`, `vuepress`, `mkdocs`.
+This is a PDF generator from document Apache Doris Website.
 
 ## ⚡ Usage
 
-For [docusaurus v1](https://v1.docusaurus.io/docs/en/installation)
-
 ```shell
-npx mr-pdf --initialDocURLs="https://v1.docusaurus.io/docs/en/installation" --paginationSelector=".docs-prevnext > a.docs-next" --excludeSelectors=".fixedHeaderContainer,footer.nav-footer,#docsNav,nav.onPageNav,a.edit-page-link,div.docs-prevnext" --cssStyle=".navPusher {padding-top: 0;}" --contentSelector="article"
+node --max-old-space-size=8192 ./lib/cli.js --initialDocURLs="https://doris.apache.org/zh-CN/docs/dev/get-starting/" --paginationSelector=".pagination-nav__link--next" --contentSelector="article" --coverImage="https://cdn.selectdb.com/static/doris_logo_512_4903556647.png" --coverTitle="Apache Doris Docs (中文)" --outputPDFFilename="Apache Doris Docs (中文).pdf" --tocOnlyH1=true
 ```
 
 ## 🍗 CLI Options
@@ -35,115 +29,3 @@ npx mr-pdf --initialDocURLs="https://v1.docusaurus.io/docs/en/installation" --pa
 | `--footerTemplate`     | No       | HTML template for the print footer. Please check this link for details of injecting values[Puppeteer document](https://pptr.dev/#?product=Puppeteer&show=api-pagepdfoptions)                   |
 | --buildDirPath           | No       | location of build directory                                                                                                                                                                 |
 | --firstDocPath           | No       | location of first doc path                                                                                                                                                                  |
-
-## 🎨 Examples and Demo PDF
-
-### Docusaurus v1
-
-[https://docusaurus.io/en/](https://docusaurus.io/en/)
-
-`initialDocURLs`: [https://docusaurus.io/docs/en/installation](https://docusaurus.io/docs/en/installation)
-
-`demoPDF`: [https://github.com/kohheepeace/mr-pdf/blob/master/v1-docusaurus.pdf](https://github.com/kohheepeace/mr-pdf/blob/master/v1-docusaurus.pdf)
-
-`command`:
-
-```shell
-npx mr-pdf --initialDocURLs="https://docusaurus.io/docs/en/installation" --paginationSelector=".docs-prevnext > a.docs-next" --excludeSelectors=".fixedHeaderContainer,footer.nav-footer,#docsNav,nav.onPageNav,a.edit-page-link,div.docs-prevnext" --cssStyle=".navPusher {padding-top: 0;}" --pdfMargin="20"
-```
-
-### Docusaurus v2 beta
-
-![20210603060438](https://user-images.githubusercontent.com/29557494/120552058-b4299e00-c431-11eb-833e-1ac1338b0a70.gif)
-
-[https://docusaurus.io/](https://docusaurus.io/)
-
-`initialDocURLs`: [https://docusaurus.io/docs](https://docusaurus.io/docs)
-
-`demoPDF`: [https://github.com/kohheepeace/mr-pdf/blob/master/v2-docusaurus.pdf](https://github.com/kohheepeace/mr-pdf/blob/master/v2-docusaurus.pdf)
-
-`command`:
-
-```shell
-npx mr-pdf --initialDocURLs="https://docusaurus.io/docs/" --contentSelector="article" --paginationSelector=".pagination-nav__item--next > a" --excludeSelectors=".margin-vert--xl a" --coverImage="https://docusaurus.io/img/docusaurus.png" --coverTitle="Docusaurus v2"
-```
-
-### Vuepress v1
-
-[https://vuepress.vuejs.org/](https://vuepress.vuejs.org/)
-
-`initialDocURLs`:
-
-[https://vuepress.vuejs.org/guide/](https://vuepress.vuejs.org/guide/)
-
-`demoPDF`: [https://github.com/kohheepeace/mr-pdf/blob/master/v1-vuepress.pdf](https://github.com/kohheepeace/mr-pdf/blob/master/v1-vuepress.pdf)
-`command`:
-
-```shell
-npx mr-pdf --initialDocURLs="https://vuepress.vuejs.org/guide/" --contentSelector="main" --paginationSelector=".page-nav .next a" --excludeSelectors="header.navbar,aside.sidebar,footer.page-edit .edit-link,.global-ui,.page-nav" --coverImage="https://vuepress.vuejs.org/hero.png" --coverTitle="VuePress" --coverSub="Vue-powered Static Site Generator"
-```
-
-### Vuepress v2 beta
-
-[https://v2.vuepress.vuejs.org/](https://v2.vuepress.vuejs.org/)
-
-`initialDocURLs`:
-
-[https://v2.vuepress.vuejs.org/guide/](https://v2.vuepress.vuejs.org/guide/)
-
-`demoPDF`: [https://github.com/kohheepeace/mr-pdf/blob/master/v2-vuepress.pdf](https://github.com/kohheepeace/mr-pdf/blob/master/v2-vuepress.pdf)
-`command`:
-
-```shell
-npx mr-pdf --initialDocURLs="https://v2.vuepress.vuejs.org/guide/" --contentSelector="main" --paginationSelector=".page-nav .next a" --excludeSelectors="header.navbar,aside.sidebar,footer.page-edit .edit-link,.global-ui,.page-nav" --coverImage="https://v2.vuepress.vuejs.org/images/hero.png" --coverTitle="VuePress" --coverSub="Vue-powered Static Site Generator"
-```
-
-### Mkdocs
-
-[https://www.mkdocs.org/](https://www.mkdocs.org/)
-
-`initialDocURLs`: [https://www.mkdocs.org/](https://www.mkdocs.org/)
-
-`demoPDF`: [https://github.com/kohheepeace/mr-pdf/blob/master/mkdocs.pdf](https://github.com/kohheepeace/mr-pdf/blob/master/mkdocs.pdf)
-
-`command`:
-
-```shell
-npx mr-pdf --initialDocURLs="https://www.mkdocs.org/" --paginationSelector="ul.navbar-nav li.nav-item a[rel~='next']" --excludeSelectors=".navbar.fixed-top,footer,.homepage .container .row .col-md-3,#toc-collapse" --cssStyle=".col-md-9 {flex: 0 0 100%; max-width: 100%;}"
-```
-
-### Material for Mkdocs
-
-[https://squidfunk.github.io/mkdocs-material/](https://squidfunk.github.io/mkdocs-material/)
-
-`initialDocURLs`: [https://squidfunk.github.io/mkdocs-material/getting-started/](https://squidfunk.github.io/mkdocs-material/getting-started/)
-
-`demoPDF`: [https://github.com/kohheepeace/mr-pdf/blob/master/material-for-mkdocs.pdf](https://github.com/kohheepeace/mr-pdf/blob/master/material-for-mkdocs.pdf)
-`command`:
-
-```shell
-npx mr-pdf --initialDocURLs="https://squidfunk.github.io/mkdocs-material/getting-started/" --paginationSelector="a.md-footer-nav__link--next" --excludeSelectors="header.md-header,.announce,nav.md-tabs,.md-main__inner .md-sidebar--primary,.md-main__inner .md-sidebar--secondary,footer" --cssStyle=".md-content {max-width: 100%!important;}"
-```
-
-### Generate PDF from build folder
-
-```json
-npx mr-pdf --buildDirPath="docusaurus-website/build"  --firstDocPath="/docs/summary/basic-summary/" --paginationSelector=".pagination-nav__link--next" --contentSelector="article"
-```
-
-#### PR to add new docs is welcome here... 😸
-
-## 📄 How `mr-pdf` works
-
-1. [puppter](https://pptr.dev/) can make html to PDF like you can print HTML page in chrome browser
-2. so, the idea of mr-pdf is **generating one big HTML through looping page link, then run [`page.pdf()`](https://github.com/puppeteer/puppeteer/blob/v13.1.3/docs/api.md#pagepdfoptions)** from puppter to generate PDF.
-
-![mr-pdf-diagram](https://user-images.githubusercontent.com/29557494/90359040-c8fb9780-e092-11ea-89c7-1868bc32919f.png)
-
-## 🎉 Thanks
-
-This repo's code is coming from [https://github.com/KohheePeace/docusaurus-pdf](https://github.com/KohheePeace/docusaurus-pdf).
-
-Thanks for awesome code made by [@maxarndt](https://github.com/maxarndt) and [@aloisklink](https://github.com/aloisklink).
-
-[@bojl](https://github.com/bojl) approach to make TOC was awesome and breakthrough.

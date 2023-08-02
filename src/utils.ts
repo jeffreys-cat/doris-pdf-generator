@@ -5,128 +5,132 @@ import puppeteer = require('puppeteer');
 
 let contentHTML = '';
 export interface generatePDFOptions {
-  initialDocURLs: Array<string>;
-  excludeURLs: Array<string>;
-  outputPDFFilename: string;
-  pdfMargin: puppeteer.PDFOptions['margin'];
-  contentSelector: string;
-  pdfFormat: puppeteer.PaperFormat;
-  excludeSelectors: Array<string>;
-  cssStyle: string;
-  puppeteerArgs: Array<string>;
-  coverTitle: string;
-  coverImage: string;
-  paginationSelector: string;
-  disableTOC: boolean;
-  coverSub: string;
-  waitForRender: number;
-  headerTemplate: string;
-  footerTemplate: string;
-  buildDirPath: string;
-  firstDocPath: string;
-  tocOnlyH1: boolean;
+    initialDocURLs: Array<string>;
+    excludeURLs: Array<string>;
+    outputPDFFilename: string;
+    pdfMargin: puppeteer.PDFOptions['margin'];
+    contentSelector: string;
+    pdfFormat: puppeteer.PaperFormat;
+    excludeSelectors: Array<string>;
+    cssStyle: string;
+    puppeteerArgs: Array<string>;
+    coverTitle: string;
+    coverImage: string;
+    paginationSelector: string;
+    disableTOC: boolean;
+    coverSub: string;
+    waitForRender: number;
+    headerTemplate: string;
+    footerTemplate: string;
+    buildDirPath: string;
+    firstDocPath: string;
+    tocOnlyH1: boolean;
 }
 
 export async function generatePDF({
-  initialDocURLs,
-  excludeURLs,
-  outputPDFFilename = 'mr-pdf.pdf',
-  pdfMargin = { top: 32, right: 32, bottom: 32, left: 32 },
-  contentSelector,
-  paginationSelector,
-  pdfFormat,
-  excludeSelectors,
-  cssStyle,
-  puppeteerArgs,
-  coverTitle,
-  coverImage,
-  disableTOC,
-  tocOnlyH1,
-  coverSub,
-  waitForRender,
-  headerTemplate,
-  footerTemplate,
+    initialDocURLs,
+    excludeURLs,
+    outputPDFFilename = 'mr-pdf.pdf',
+    pdfMargin = { top: 32, right: 32, bottom: 32, left: 32 },
+    contentSelector,
+    paginationSelector,
+    pdfFormat,
+    excludeSelectors,
+    cssStyle,
+    puppeteerArgs,
+    coverTitle,
+    coverImage,
+    disableTOC,
+    tocOnlyH1,
+    coverSub,
+    waitForRender,
+    headerTemplate,
+    footerTemplate,
 }: generatePDFOptions): Promise<void> {
-  const browser = await puppeteer.launch({ args: puppeteerArgs });
-  const page = await browser.newPage();
+    const browser = await puppeteer.launch({
+        args: puppeteerArgs,
+        headless: 'new',
+        protocolTimeout: 18000000,
+    });
+    const page = await browser.newPage();
 
-  for (const url of initialDocURLs) {
-    let nextPageURL = url;
+    for (const url of initialDocURLs) {
+        let nextPageURL = url;
 
-    // Create a list of HTML for the content section of all pages by looping
-    while (nextPageURL) {
-      console.log();
-      console.log(chalk.cyan(`Retrieving html from ${nextPageURL}`));
-      console.log();
+        // Create a list of HTML for the content section of all pages by looping
+        while (nextPageURL) {
+            console.log(chalk.cyan(`Retrieving html from ${nextPageURL}`));
 
-      if (waitForRender) {
-        await page.goto(`${nextPageURL}`);
-        console.log(chalk.green('Rendering...'));
-        await page.waitForFunction(waitForRender.toString());
-      } else {
-        // Go to the page specified by nextPageURL
-        await page.goto(`${nextPageURL}`, {
-          waitUntil: 'networkidle0',
-          timeout: 0,
-        });
-      }
+            if (waitForRender) {
+                await page.goto(`${nextPageURL}`);
+                console.log(chalk.green('Rendering...'));
+                await page.waitForFunction(waitForRender.toString());
+            } else {
+                // Go to the page specified by nextPageURL
+                await page.goto(`${nextPageURL}`, {
+                    waitUntil: 'networkidle0',
+                    timeout: 0,
+                });
+            }
 
-      // Get the HTML string of the content section.
-      const html = await page.evaluate(
-        ({ contentSelector }) => {
-          const element: HTMLElement | null = document.querySelector(
-            contentSelector,
-          );
-          if (element) {
-            // Add pageBreak for PDF
-            element.style.pageBreakAfter = 'always';
+            // Get the HTML string of the content section.
+            const html = await page.evaluate(
+                ({ contentSelector }) => {
+                    const element: HTMLElement | null = document.querySelector(
+                        contentSelector,
+                    );
+                    if (element) {
+                        // Add pageBreak for PDF
+                        element.style.pageBreakAfter = 'always';
 
-            // Open <details> tag
-            const detailsArray = element.getElementsByTagName('details');
-            Array.from(detailsArray).forEach((element) => {
-              element.open = true;
-            });
+                        // Open <details> tag
+                        const detailsArray = element.getElementsByTagName(
+                            'details',
+                        );
+                        Array.from(detailsArray).forEach((element) => {
+                            element.open = true;
+                        });
 
-            return element.outerHTML;
-          } else {
-            return '';
-          }
-        },
-        { contentSelector },
-      );
+                        return element.outerHTML;
+                    } else {
+                        return '';
+                    }
+                },
+                { contentSelector },
+            );
 
-      // Make joined content html
-      if (excludeURLs && excludeURLs.includes(nextPageURL)) {
-        console.log(chalk.green('This URL is excluded.'));
-      } else {
-        contentHTML += html;
-        console.log(chalk.green('Success'));
-      }
+            // Make joined content html
+            if (excludeURLs && excludeURLs.includes(nextPageURL)) {
+                console.log(chalk.green('This URL is excluded.'));
+            } else {
+                contentHTML += html;
+                console.log(chalk.green('Success'));
+            }
 
-      // Find next page url before DOM operations
-      nextPageURL = await page.evaluate((paginationSelector) => {
-        const element = document.querySelector(paginationSelector);
-        if (element) {
-          return (element as HTMLLinkElement).href;
-        } else {
-          return '';
+            // Find next page url before DOM operations
+            nextPageURL = await page.evaluate((paginationSelector) => {
+                const element = document.querySelector(paginationSelector);
+                if (element) {
+                    return (element as HTMLLinkElement).href;
+                } else {
+                    return '';
+                }
+            }, paginationSelector);
         }
-      }, paginationSelector);
     }
-  }
 
-  // Download buffer of coverImage if exists
-  let imgBase64 = '';
-  if (coverImage) {
-    const imgSrc = await page.goto(coverImage);
-    const imgSrcBuffer = await imgSrc?.buffer();
-    imgBase64 = imgSrcBuffer?.toString('base64') || '';
-  }
+    // Download buffer of coverImage if exists
+    let imgBase64 = '';
+    if (coverImage) {
+        const imgSrc = await page.goto(coverImage);
+        const imgSrcBuffer = await imgSrc?.buffer();
+        imgBase64 = imgSrcBuffer?.toString('base64') || '';
+    }
 
-  // Go to initial page
-  await page.goto(`${initialDocURLs[0]}`, { waitUntil: 'networkidle0' });
+    // Go to initial page
+    await page.goto(`${initialDocURLs[0]}`, { waitUntil: 'networkidle0' });
 
-  const coverHTML = `
+    const coverHTML = `
   <div
     class="pdf-cover"
     style="
@@ -150,141 +154,150 @@ export async function generatePDF({
     />
   </div>`;
 
-  // Add Toc
-  const { modifiedContentHTML, tocHTML } = generateToc(contentHTML, tocOnlyH1);
+    // Add Toc
+    const { modifiedContentHTML, tocHTML } = generateToc(
+        contentHTML,
+        tocOnlyH1,
+    );
 
-  // Restructuring the html of a document
-  await page.evaluate(
-    ({ coverHTML, tocHTML, modifiedContentHTML, disableTOC }) => {
-      // Empty body content
-      const body = document.body;
-      body.innerHTML = '';
+    // Restructuring the html of a document
+    await page.evaluate(
+        ({ coverHTML, tocHTML, modifiedContentHTML, disableTOC }) => {
+            // Empty body content
+            const body = document.body;
+            body.innerHTML = '';
 
-      // Add Cover
-      body.innerHTML += coverHTML;
+            // Add Cover
+            body.innerHTML += coverHTML;
 
-      // Add toc
-      if (!disableTOC) body.innerHTML += tocHTML;
+            // Add toc
+            if (!disableTOC) body.innerHTML += tocHTML;
 
-      // Add body content
-      body.innerHTML += modifiedContentHTML;
-    },
-    { coverHTML, tocHTML, modifiedContentHTML, disableTOC },
-  );
+            // Add body content
+            body.innerHTML += modifiedContentHTML;
+        },
+        { coverHTML, tocHTML, modifiedContentHTML, disableTOC },
+    );
 
-  // Remove unnecessary HTML by using excludeSelectors
-  excludeSelectors &&
-    excludeSelectors.map(async (excludeSelector) => {
-      // "selector" is equal to "excludeSelector"
-      // https://pptr.dev/#?product=Puppeteer&version=v5.2.1&show=api-pageevaluatepagefunction-args
-      await page.evaluate((selector) => {
-        const matches = document.querySelectorAll(selector);
-        matches.forEach((match) => match.remove());
-      }, excludeSelector);
+    // Remove unnecessary HTML by using excludeSelectors
+    excludeSelectors &&
+        excludeSelectors.map(async (excludeSelector) => {
+            // "selector" is equal to "excludeSelector"
+            // https://pptr.dev/#?product=Puppeteer&version=v5.2.1&show=api-pageevaluatepagefunction-args
+            await page.evaluate((selector) => {
+                const matches = document.querySelectorAll(selector);
+                matches.forEach((match) => match.remove());
+            }, excludeSelector);
+        });
+
+    // Add CSS to HTML
+    if (cssStyle) {
+        await page.addStyleTag({ content: cssStyle });
+    }
+
+    // Scroll to the bottom of the page with puppeteer-autoscroll-down
+    // This forces lazy-loading images to load
+    await scrollPageToBottom(page, {});
+
+    await page.pdf({
+        path: outputPDFFilename,
+        format: pdfFormat,
+        printBackground: true,
+        margin: pdfMargin,
+        displayHeaderFooter: !!(headerTemplate || footerTemplate),
+        headerTemplate,
+        footerTemplate,
+        timeout: 0,
     });
-
-  // Add CSS to HTML
-  if (cssStyle) {
-    await page.addStyleTag({ content: cssStyle });
-  }
-
-  // Scroll to the bottom of the page with puppeteer-autoscroll-down
-  // This forces lazy-loading images to load
-  await scrollPageToBottom(page, {});
-
-  await page.pdf({
-    path: outputPDFFilename,
-    format: pdfFormat,
-    printBackground: true,
-    margin: pdfMargin,
-    displayHeaderFooter: !!(headerTemplate || footerTemplate),
-    headerTemplate,
-    footerTemplate,
-    timeout: 0,
-  });
 }
 
 function generateToc(contentHtml: string, tocOnlyH1 = false) {
-  const headers: Array<{
-    header: string;
-    level: number;
-    id: string;
-  }> = [];
+    const headers: Array<{
+        header: string;
+        level: number;
+        id: string;
+    }> = [];
 
-  // Create TOC only for h1~h3
-  const modifiedContentHTML = contentHtml.replace(
-    /<h[1-3](.+?)<\/h[1-3]( )*>/g,
-    htmlReplacer,
-  );
+    // Create TOC only for h1~h3
+    const modifiedContentHTML = contentHtml.replace(
+        /<h[1-3](.+?)<\/h[1-3]( )*>/g,
+        htmlReplacer,
+    );
 
-  function htmlReplacer(matchedStr: string) {
-    // docusaurus inserts #s into headers for direct links to the header
-    const headerText = matchedStr
-      .replace(/<a[^>]*>#<\/a( )*>/g, '')
-      .replace(/<[^>]*>/g, '')
-      .trim();
+    function htmlReplacer(matchedStr: string) {
+        // docusaurus inserts #s into headers for direct links to the header
+        const headerText = matchedStr
+            .replace(/<a[^>]*>#<\/a( )*>/g, '')
+            .replace(/<[^>]*>/g, '')
+            .trim();
 
-    const headerId = `${Math.random().toString(36).substr(2, 5)}-${
-      headers.length
-    }`;
+        const headerId = `${Math.random().toString(36).substr(2, 5)}-${
+            headers.length
+        }`;
 
-    // level is h<level>
-    const level = Number(matchedStr[matchedStr.indexOf('h') + 1]);
+        // level is h<level>
+        const level = Number(matchedStr[matchedStr.indexOf('h') + 1]);
 
-    headers.push({
-      header: headerText,
-      level,
-      id: headerId,
-    });
+        headers.push({
+            header: headerText,
+            level,
+            id: headerId,
+        });
 
-    const modifiedContentHTML = matchedStr.replace(/<h[1-3].*?>/g, (header) => {
-      if (header.match(/id( )*=( )*"/g)) {
-        return header.replace(/id( )*=( )*"/g, `id="${headerId} `);
-      } else {
-        return header.substring(0, header.length - 1) + ` id="${headerId}">`;
-      }
-    });
+        const modifiedContentHTML = matchedStr.replace(
+            /<h[1-3].*?>/g,
+            (header) => {
+                if (header.match(/id( )*=( )*"/g)) {
+                    return header.replace(/id( )*=( )*"/g, `id="${headerId} `);
+                } else {
+                    return (
+                        header.substring(0, header.length - 1) +
+                        ` id="${headerId}">`
+                    );
+                }
+            },
+        );
 
-    return modifiedContentHTML;
-  }
+        return modifiedContentHTML;
+    }
 
-  let TOC_HEADERS = headers;
-  if (tocOnlyH1) {
-    TOC_HEADERS = headers.filter((header) => header.level === 1);
-  }
-  const toc = TOC_HEADERS.map(
-    (header) =>
-      `<li class="toc-item toc-item-${header.level}" style="margin-left:${
-        (header.level - 1) * 20
-      }px"><a href="#${header.id}">${header.header}</a></li>`,
-  ).join('\n');
+    let TOC_HEADERS = headers;
+    if (tocOnlyH1) {
+        TOC_HEADERS = headers.filter((header) => header.level <= 1);
+    }
+    const toc = TOC_HEADERS.map(
+        (header) =>
+            `<li class="toc-item toc-item-${header.level}" style="margin-left:${
+                (header.level - 1) * 20
+            }px"><a href="#${header.id}">${header.header}</a></li>`,
+    ).join('\n');
 
-  const tocHTML = `
+    const tocHTML = `
   <div class="toc-page" style="page-break-after: always;">
     <h1 class="toc-header">Table of contents:</h1>
     <ul class="toc-list">${toc}</ul>
   </div>
   `;
 
-  return { modifiedContentHTML, tocHTML };
+    return { modifiedContentHTML, tocHTML };
 }
 
 function hasOwnProperty<
-  X extends Record<PropertyKey, unknown> & any,
-  Y extends PropertyKey
+    X extends Record<PropertyKey, unknown> & any,
+    Y extends PropertyKey
 >(obj: X, prop: Y): obj is X & Record<Y, unknown> {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
+    return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
 export const isAddressInfo = (arg: unknown): arg is AddressInfo => {
-  return (
-    arg !== null &&
-    typeof arg === 'object' &&
-    hasOwnProperty(arg, 'address') &&
-    typeof arg.address == 'string' &&
-    hasOwnProperty(arg, 'family') &&
-    typeof arg.family == 'string' &&
-    hasOwnProperty(arg, 'port') &&
-    typeof arg.port == 'number'
-  );
+    return (
+        arg !== null &&
+        typeof arg === 'object' &&
+        hasOwnProperty(arg, 'address') &&
+        typeof arg.address == 'string' &&
+        hasOwnProperty(arg, 'family') &&
+        typeof arg.family == 'string' &&
+        hasOwnProperty(arg, 'port') &&
+        typeof arg.port == 'number'
+    );
 };
