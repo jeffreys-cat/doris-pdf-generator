@@ -1,6 +1,6 @@
 ## 📌 Introduction
 
-This is a PDF generator from document Apache Doris Website.
+This is a PDF generator for document Apache Doris Website.
 
 ## ⚡ Usage
 
