@@ -197,7 +197,7 @@ export async function generatePDF({
 
     // Scroll to the bottom of the page with puppeteer-autoscroll-down
     // This forces lazy-loading images to load
-    await scrollPageToBottom(page, {});
+    await scrollPageToBottom(page as any, {});
 
     await page.pdf({
         path: outputPDFFilename,
